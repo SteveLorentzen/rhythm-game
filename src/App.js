@@ -6,9 +6,16 @@ import bopSound from './sounds/Bop.m4a';
 // import chtSound from './sounds/Cht.m4a';
 
 function AudioAnalyser({ audio, handleClap }) {
+  const [audioContext, setAudioContext] = React.useState();
+
   React.useEffect(() => {
-    const audioContext = new (window.AudioContext ||
-      window.webkitAudioContext)();
+    setAudioContext(new (window.AudioContext || window.webkitAudioContext)());
+  }, []);
+
+  React.useEffect(() => {
+    if (!audioContext) {
+      return;
+    }
     const analyser = audioContext.createAnalyser();
     const dataArray = new Uint8Array(512);
     const source = audioContext.createMediaStreamSource(audio);
@@ -39,7 +46,7 @@ function AudioAnalyser({ audio, handleClap }) {
       analyser.disconnect();
       source.disconnect();
     };
-  }, [audio, handleClap]);
+  }, [audio, handleClap, audioContext]);
   return <div />;
 }
 
@@ -67,7 +74,6 @@ function App() {
 
   const [playClick] = useSound(clickSound);
   const [playBop] = useSound(bopSound);
-  // const [playCht] = useSound(chtSound);
 
   async function getMicrophone() {
     const audio = await navigator.mediaDevices.getUserMedia({
@@ -189,21 +195,16 @@ function App() {
     >
       <button onClick={startClick}>Start!</button>
       <button onClick={stopClick}>Stop</button>
-      {/* <input onKeyDown={handleRhythm}></input> */}
-      {/* <audio controls ref={audioRef}></audio> */}
+
       <div>
-        <h1>Correct Count:</h1>
-        <h1>{correctCount}</h1>
+        <h2>Correct Count:</h2>
+        <p>{correctCount}</p>
       </div>
       <div>
-        <h1>Incorrect Count:</h1>
-        <h1>{incorrectCount}</h1>
+        <h2>Incorrect Count:</h2>
+        <p>{incorrectCount}</p>
       </div>
-      {/* <div className='controls'>
-        <button onClick={toggleMicrophone}>
-          {audio ? 'Stop microphone' : 'Get microphone input'}
-        </button>
-      </div> */}
+
       {audio && <p>listening...</p>}
       {audio ? <AudioAnalyser handleClap={handleRhythm} audio={audio} /> : null}
     </div>
